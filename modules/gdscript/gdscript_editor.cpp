@@ -107,8 +107,7 @@ Ref<Script> GDScriptLanguage::make_template_using_extension(const String &p_temp
 	}
 
 	// Processing the template for the GDTrait
-	if (p_extension == "gdt")
-	{
+	if (p_extension == "gdt") {
 		processed_template = processed_template.replace("extends _BASE_", "trait_name _CLASS_ extends _BASE_");
 	}
 
