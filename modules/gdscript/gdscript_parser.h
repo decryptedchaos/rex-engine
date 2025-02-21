@@ -1265,7 +1265,11 @@ public:
 	struct UnaryOpNode : public ExpressionNode {
 		enum OpType {
 			OP_POSITIVE,
+			OP_INCREMENT,
+			OP_POST_INCREMENT,
 			OP_NEGATIVE,
+			OP_DECREMENT,
+			OP_POST_DECREMENT,
 			OP_COMPLEMENT,
 			OP_LOGIC_NOT,
 		};
@@ -1625,6 +1629,7 @@ private:
 	ExpressionNode *parse_type_test(ExpressionNode *p_previous_operand, bool p_can_assign);
 	ExpressionNode *parse_yield(ExpressionNode *p_previous_operand, bool p_can_assign);
 	ExpressionNode *parse_invalid_token(ExpressionNode *p_previous_operand, bool p_can_assign);
+	ExpressionNode *parse_increment_decrement(ExpressionNode *p_previous_operand, bool p_can_assign);
 	TypeNode *parse_type(bool p_allow_void = false);
 
 #ifdef TOOLS_ENABLED

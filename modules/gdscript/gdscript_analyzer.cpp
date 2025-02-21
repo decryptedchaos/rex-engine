@@ -5665,6 +5665,17 @@ void GDScriptAnalyzer::reduce_type_test(GDScriptParser::TypeTestNode *p_type_tes
 }
 
 void GDScriptAnalyzer::reduce_unary_op(GDScriptParser::UnaryOpNode *p_unary_op) {
+	switch (p_unary_op->operation) {
+		case GDScriptParser::UnaryOpNode::OpType::OP_INCREMENT:
+		case GDScriptParser::UnaryOpNode::OpType::OP_POST_INCREMENT:
+		case GDScriptParser::UnaryOpNode::OpType::OP_DECREMENT:
+		case GDScriptParser::UnaryOpNode::OpType::OP_POST_DECREMENT:
+			reduce_inc_dec_op(p_unary_op);
+			return;
+		default:
+			break;
+	}
+
 	reduce_expression(p_unary_op->operand);
 
 	GDScriptParser::DataType result;
@@ -5696,6 +5707,29 @@ void GDScriptAnalyzer::reduce_unary_op(GDScriptParser::UnaryOpNode *p_unary_op) 
 	}
 
 	p_unary_op->set_datatype(result);
+}
+
+void GDScriptAnalyzer::reduce_inc_dec_op(GDScriptParser::UnaryOpNode *p_unary_op) {
+	reduce_expression(p_unary_op->operand);
+
+	GDScriptParser::DataType result;
+
+	if (p_unary_op->operand == nullptr) {
+		result.kind = GDScriptParser::DataType::VARIANT;
+		p_unary_op->set_datatype(result);
+		return;
+	}
+
+	GDScriptParser::DataType operand_type = p_unary_op->operand->get_datatype();
+
+	if (p_unary_op->operand->is_constant) {
+		push_error(vformat("Cannot assign a new value to a constant.", operand_type.to_string(), Variant::get_operator_name(p_unary_op->variant_op)), p_unary_op);
+		return;
+	}
+
+	// TODO more checks for valid operations on ++ and --
+
+	p_unary_op->set_datatype(operand_type);
 }
 
 Variant GDScriptAnalyzer::make_expression_reduced_value(GDScriptParser::ExpressionNode *p_expression, bool &is_reduced) {

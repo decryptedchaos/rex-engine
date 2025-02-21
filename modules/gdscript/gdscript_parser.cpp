@@ -2880,6 +2880,24 @@ GDScriptParser::ExpressionNode *GDScriptParser::parse_unary_operator(ExpressionN
 				push_error(R"(Expected expression after "+" operator.)");
 			}
 			break;
+		case GDScriptTokenizer::Token::MINUS_MINUS:
+			// Prefix -- operator
+			operation->operation = UnaryOpNode::OP_DECREMENT;
+			operation->variant_op = Variant::OP_DECREMENT;
+			operation->operand = parse_precedence(PREC_SIGN, false);
+			if (operation->operand == nullptr) {
+				push_error(R"(Expected expression after prefix "--" operator.)");
+			}
+			break;
+		case GDScriptTokenizer::Token::PLUS_PLUS:
+			// Prefix ++ operator
+			operation->operation = UnaryOpNode::OP_INCREMENT;
+			operation->variant_op = Variant::OP_INCREMENT;
+			operation->operand = parse_precedence(PREC_SIGN, false);
+			if (operation->operand == nullptr) {
+				push_error(R"(Expected expression after prefix "++" operator.)");
+			}
+			break;
 		case GDScriptTokenizer::Token::TILDE:
 			operation->operation = UnaryOpNode::OP_COMPLEMENT;
 			operation->variant_op = Variant::OP_BIT_NEGATE;
@@ -3764,6 +3782,32 @@ GDScriptParser::ExpressionNode *GDScriptParser::parse_invalid_token(ExpressionNo
 	return p_previous_operand;
 }
 
+GDScriptParser::ExpressionNode *GDScriptParser::parse_increment_decrement(ExpressionNode *p_previous_operand, bool p_can_assign) {
+	GDScriptTokenizer::Token::Type op_type = previous.type;
+	UnaryOpNode *operation = alloc_node<UnaryOpNode>();
+	reset_extents(operation, p_previous_operand);
+	update_extents(operation);
+
+	operation->operand = p_previous_operand;
+
+	switch (op_type) {
+		case GDScriptTokenizer::Token::MINUS_MINUS:
+			operation->operation = UnaryOpNode::OP_POST_DECREMENT;
+			operation->variant_op = Variant::OP_POST_DECREMENT;
+			break;
+		case GDScriptTokenizer::Token::PLUS_PLUS:
+			operation->operation = UnaryOpNode::OP_POST_INCREMENT;
+			operation->variant_op = Variant::OP_POST_INCREMENT;
+			break;
+		default:
+			complete_extents(operation);
+			return nullptr; // Unreachable.
+	}
+	complete_extents(operation);
+
+	return operation;
+}
+
 GDScriptParser::TypeNode *GDScriptParser::parse_type(bool p_allow_void) {
 	TypeNode *type = alloc_node<TypeNode>();
 	make_completion_context(p_allow_void ? COMPLETION_TYPE_NAME_OR_VOID : COMPLETION_TYPE_NAME, type);
@@ -4162,7 +4206,9 @@ GDScriptParser::ParseRule *GDScriptParser::get_rule(GDScriptTokenizer::Token::Ty
 		{ nullptr,                                          &GDScriptParser::parse_binary_operator,      	PREC_BIT_SHIFT }, // GREATER_GREATER,
 		// Math
 		{ &GDScriptParser::parse_unary_operator,         	&GDScriptParser::parse_binary_operator,      	PREC_ADDITION_SUBTRACTION }, // PLUS,
+		{ &GDScriptParser::parse_unary_operator,         	&GDScriptParser::parse_increment_decrement,      	PREC_ADDITION_SUBTRACTION }, // PLUS_PLUS,
 		{ &GDScriptParser::parse_unary_operator,         	&GDScriptParser::parse_binary_operator,      	PREC_ADDITION_SUBTRACTION }, // MINUS,
+		{ &GDScriptParser::parse_unary_operator,         	&GDScriptParser::parse_increment_decrement,      	PREC_ADDITION_SUBTRACTION }, // MINUS_MINUS,
 		{ nullptr,                                          &GDScriptParser::parse_binary_operator,      	PREC_FACTOR }, // STAR,
 		{ nullptr,                                          &GDScriptParser::parse_binary_operator,      	PREC_POWER }, // STAR_STAR,
 		{ nullptr,                                          &GDScriptParser::parse_binary_operator,      	PREC_FACTOR }, // SLASH,
@@ -6316,8 +6362,27 @@ void GDScriptParser::TreePrinter::print_unary_op(UnaryOpNode *p_unary_op) {
 		case UnaryOpNode::OP_COMPLEMENT:
 			push_text("~");
 			break;
+		case UnaryOpNode::OP_INCREMENT:
+			push_text("++");
+			break;
+		case UnaryOpNode::OP_DECREMENT:
+			push_text("--");
+			break;
+		default:
+			break;
 	}
 	print_expression(p_unary_op->operand);
+
+	switch (p_unary_op->operation) {
+		case UnaryOpNode::OP_POST_DECREMENT:
+			push_text("--");
+			break;
+		case UnaryOpNode::OP_POST_INCREMENT:
+			push_text("++");
+			break;
+		default:
+			break;
+	}
 	// Surround in parenthesis for disambiguation.
 	push_text(")");
 }

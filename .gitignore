@@ -156,6 +156,10 @@ cppcheck-cppcheck-build-dir/
 # Gprof
 gmon.out
 
+# GDB
+.gdbinit
+pretty_printer.py
+
 # Jetbrains IDEs
 .idea/
 .fleet/

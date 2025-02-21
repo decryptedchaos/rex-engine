@@ -83,7 +83,9 @@ public:
 			GREATER_GREATER,
 			// Math
 			PLUS,
+			PLUS_PLUS,
 			MINUS,
+			MINUS_MINUS,
 			STAR,
 			STAR_STAR,
 			SLASH,
