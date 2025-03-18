@@ -72,7 +72,9 @@ static const char *token_names[] = {
 	">>", // GREATER_GREATER,
 	// Math
 	"+", // PLUS,
+	"++", // PLUS_PLUS,
 	"-", // MINUS,
+	"--", // MINUS_MINUS,
 	"*", // STAR,
 	"**", // STAR_STAR,
 	"/", // SLASH,
@@ -1568,6 +1570,9 @@ GDScriptTokenizer::Token GDScriptTokenizerText::scan() {
 			if (_peek() == '=') {
 				_advance();
 				return make_token(Token::PLUS_EQUAL);
+			} else if (_peek() == '+') {
+				_advance();
+				return make_token(Token::PLUS_PLUS);
 			} else if (is_digit(_peek()) && !last_token.can_precede_bin_op()) {
 				// Number starting with '+'.
 				return number();
@@ -1578,6 +1583,9 @@ GDScriptTokenizer::Token GDScriptTokenizerText::scan() {
 			if (_peek() == '=') {
 				_advance();
 				return make_token(Token::MINUS_EQUAL);
+			} else if (_peek() == '-') {
+				_advance();
+				return make_token(Token::MINUS_MINUS);
 			} else if (is_digit(_peek()) && !last_token.can_precede_bin_op()) {
 				// Number starting with '-'.
 				return number();

@@ -120,6 +120,7 @@ class GDScriptAnalyzer {
 	void reduce_ternary_op(GDScriptParser::TernaryOpNode *p_ternary_op, bool p_is_root = false);
 	void reduce_type_test(GDScriptParser::TypeTestNode *p_type_test);
 	void reduce_unary_op(GDScriptParser::UnaryOpNode *p_unary_op);
+	void reduce_inc_dec_op(GDScriptParser::UnaryOpNode *p_unary_op);
 
 	Variant make_expression_reduced_value(GDScriptParser::ExpressionNode *p_expression, bool &is_reduced);
 	Variant make_array_reduced_value(GDScriptParser::ArrayNode *p_array, bool &is_reduced);

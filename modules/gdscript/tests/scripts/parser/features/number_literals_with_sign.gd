@@ -2,10 +2,8 @@ func test():
 	print(-9223372036854775808 == (1 << 63))
 	print(-2)
 	print(- 2)
-	print(---2)
 	print(3 - 2)
 	print(3-2)
-	print(3---2)
 	print(-3 - 2)
 	print(-3 - -2)
 	print(-(3 - 2)-2)
@@ -13,5 +11,4 @@ func test():
 	var t = 1
 	print(t-1)
 	print(-0xFF)
-	print(1--0xFF)
 	print(floor(PI-1))
